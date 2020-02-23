@@ -1,7 +1,6 @@
-image: python:3.7
+image: python:3.6
+
 variables:
-  CI_REGISTRY: "registry.gitlab.com"
-  PROJECT_REGISTRY: "$CI_REGISTRY/hmajid2301/markdown-to-devto"
   DOCKER_DRIVER: overlay2
 
 services:
@@ -14,64 +13,93 @@ stages:
 
 test:linter:
   stage: test
+  except:
+    - master
   script:
     - pip install tox
     - make lint
 
 test:code-formatter:
   stage: test
+  except:
+    - master
   script:
     - pip install tox
     - make code-formatter-check
 
 test:unit-tests:
   stage: test
+  except:
+    - master
   script:
     - pip install tox
     - make tests
 
-test:check-manifest:
+test:coverage:
   stage: test
   only:
-    - /^release/.*$/
+    - master
   script:
     - pip install tox
-    - make check-manifest
-
-publish_package:staging:
-  stage: pre-publish
-  only:
-    - /^release/.*$/
-  variables:
-    TWINE_USERNAME: $PYPI_STAGING_USERNAME
-    TWINE_PASSWORD: $PYPI_STAGING_PASSWORD
-  script:
-    - pip install tox
-    - make pypi-check
-    - make pypi-upload -- --repository-url https://test.pypi.org/legacy/
-
-publish-package:production:
-  stage: publish
-  only:
-    - /^release/.*$/
-  variables:
-    TWINE_USERNAME: $PYPI_PRODUCTION_USERNAME
-    TWINE_PASSWORD: $PYPI_PRODUCTION_PASSWORD
-  script:
-    - pip install tox
-    - make pypi-check
-    - make pypi-upload
+    - make coverage
+  coverage: '/^TOTAL.+?(\S+\%)$/'
 
 publish-docker:
-  stage: publish
+  stage: pre-publish
   image: docker
+  only:
+    - /^release/.*$/
   before_script:
     - apk add python3-dev
     - python3 setup.py sdist
   script:
     - export VERSION_TAG=$(cat setup.py | grep version | head -1 | awk -F= '{ print $2 }' | sed 's/[",]//g' | tr -d "'")
     - docker login ${CI_REGISTRY} -u gitlab-ci-token -p ${CI_BUILD_TOKEN}
-    - docker build -t ${PROJECT_REGISTRY}:latest  .
-    - docker build -t ${PROJECT_REGISTRY}:${VERSION_TAG}  .
-    - docker push ${PROJECT_REGISTRY}:latest
-    - docker push ${PROJECT_REGISTRY}:${VERSION_TAG}
+    - docker pull ${CI_REGISTRY_IMAGE}:${VERSION_TAG} && echo "Tag ${VERSION_TAG} already exists" && exit 1 || true
+    - docker build -t ${CI_REGISTRY_IMAGE}:latest -t ${CI_REGISTRY_IMAGE}:${VERSION_TAG}  .
+    - docker push ${CI_REGISTRY_IMAGE}:latest
+    - docker push ${CI_REGISTRY_IMAGE}:${VERSION_TAG}
+    - docker login -u hmajid2301 -p ${DOCKER_PASSWORD}
+    - export IMAGE_NAME="hmajid2301/markdown-to-devto"
+    - docker build -t ${IMAGE_NAME}:latest -t ${IMAGE_NAME}:${VERSION_TAG}  .
+    - docker push ${IMAGE_NAME}:latest
+    - docker push ${IMAGE_NAME}:${VERSION_TAG}
+
+publish-readme:hub:
+  stage: pre-publish
+  only:
+    - /^release/.*$/
+  image:
+    name: registry.gitlab.com/hmajid2301/dockerhub-descriptions-updater
+    entrypoint: [""]
+  variables:
+    DOCKERHUB_USERNAME: hmajid2301
+    DOCKERHUB_PASSWORD: ${DOCKER_PASSWORD}
+    DOCKERHUB_REPO_NAME: markdown-mermaid-to-images
+  script:
+    - pandoc --from rst README.rst --to markdown_strict -o README.md
+    - node /app/index.js
+
+publish-package:staging:
+  stage: pre-publish
+  only:
+    - /^release/.*$/
+  variables:
+    PYPI_USERNAME: $PYPI_STAGING_USERNAME
+    PYPI_PASSWORD: $PYPI_STAGING_PASSWORD
+  script:
+    - pip install tox
+    - make pypi-check
+    - make pypi-upload OPTIONS="-- --repository-url https://test.pypi.org/legacy/"
+
+publish-package:production:
+  stage: publish
+  only:
+    - /^release/.*$/
+  variables:
+    PYPI_USERNAME: $PYPI_PRODUCTION_USERNAME
+    PYPI_PASSWORD: $PYPI_PRODUCTION_PASSWORD
+  script:
+    - pip install tox
+    - make pypi-check
+    - make pypi-upload

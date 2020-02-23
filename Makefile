@@ -1,28 +1,38 @@
-# prompt_example> make test OPTIONS="-- -s"
+PY=py37
+
+# prompt_example> make test PY=py35 OPTIONS="-- -s"
 .PHONY: tests
 tests:
-	@tox -e test $(OPTIONS)
+	@tox -e $(PY) $(OPTIONS)
 
+.PHONY: coverage
+coverage:
+	@tox -e coverage
+
+.PHONY: install-venv
+install-venv:
+	@tox -e dev
+
+.PHONY: isort
+isort:
+	@tox -e isort
 
 .PHONY: lint
 lint:
 	@tox -e lint
 
-
 .PHONY: code-formatter
 code-formatter:
-	@tox -e code-formatter
-
+	@tox -e black
 
 .PHONY: code-formatter-check
 code-formatter-check:
-	@tox -e code-formatter -- --check
+	@tox -e black -- --check
 
 # prompt_example> make bumpversion OPTIONS="-- --allow-dirty patch"
 .PHONY: bumpversion
 bumpversion:
 	@tox -e bumpversion $(OPTIONS)
-
 
 .PHONY: clean
 clean:
@@ -44,27 +54,18 @@ clean:
 	@rm -f *.cover
 	@rm -rf .pytest_cache/
 
-
 .PHONY: install-dev
 install-dev:
 	@pip install -e .
-
 
 .PHONY: build-dist
 build-dist:
 	@python setup.py sdist
 
-
-.PHONY: check-manifest
-check-manifest:
-	@tox -e check-manifest
-
-
 .PHONY: pypi-check
 pypi-check:
 	make build-dist
 	@tox -e pypi-check
-
 
 # prompt_example> make pypi OPTIONS="-- --repository-url https://test.pypi.org/legacy/"
 .PHONY: pypi-upload
