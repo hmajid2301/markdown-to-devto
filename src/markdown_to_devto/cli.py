@@ -33,16 +33,13 @@ import frontmatter
 from .http_client import HTTPClient
 from .utils import exceptions
 
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option(
-    "--devto-api-key", "-k", required=True, envvar="DEVTO_API_KEY", help="Your dev.to API Key.",
-)
-@click.option(
-    "--imgur-id", "-a", envvar="IMGUR_CLIENT_ID", help="If set will auto upload local images on imgur.",
-)
+@click.option("--devto-api-key", "-k", required=True, envvar="DEVTO_API_KEY", help="Your dev.to API Key.")
+@click.option("--imgur-id", "-a", envvar="IMGUR_CLIENT_ID", help="If set will auto upload local images on imgur.")
 @click.option("--file", "-m", type=click.Path(exists=True), help="The markdown file to publish.")
 @click.option("--folder", "-f", type=click.Path(exists=True), help="Path to folder to publish markdown files from.")
 @click.option(
@@ -52,8 +49,12 @@ logger = logging.getLogger(__name__)
     multiple=True,
     help="Path to folder to ignore and not publish markdown files from .history.",
 )
-def cli(devto_api_key, imgur_id, file, folder, ignore):
+@click.option(
+    "--log-level", "-l", default="INFO", type=click.Choice(["DEBUG", "INFO", "ERROR"]), help="Log level for the script."
+)
+def cli(devto_api_key, imgur_id, file, folder, ignore, log_level):
     """A CLI tool for publish markdown articles to dev.to."""
+    logger.setLevel(log_level)
     local_article_paths = get_article_paths(file, folder, ignore)
     articles_to_upload = get_local_articles(local_article_paths)
     http_client = HTTPClient(devto_api_key=devto_api_key, imgur_client_id=imgur_id)

@@ -36,14 +36,18 @@ Usage: markdown_to_devto [OPTIONS]
 
   A CLI tool for publish markdown articles to dev.to.
 
-  Options:
-    -k, --devto-api-key TEXT  Your dev.to API Key.  [required]
-    -a, --imgur-id TEXT       If set will auto upload local images on imgur.
-    -m, --file PATH           The markdown file to publish.
-    -f, --folder PATH         Path to folder to publish markdown files from.
-    -i, --ignore PATH         Path to folder to ignore and not publish markdown
-                              files from .history.
-    --help                    Show this message and exit.
+Options:
+  -k, --devto-api-key TEXT        Your dev.to API Key.  [required]
+  -a, --imgur-id TEXT             If set will auto upload local images on
+                                  imgur.
+  -m, --file PATH                 The markdown file to publish.
+  -f, --folder PATH               Path to folder to publish markdown files
+                                  from.
+  -i, --ignore PATH               Path to folder to ignore and not publish
+                                  markdown files from .history.
+  -l, --log-level                 [DEBUG|INFO|ERROR]
+                                  Log level for the script.
+  --help                          Show this message and exit.
 
 .. code-block:: bash
 
