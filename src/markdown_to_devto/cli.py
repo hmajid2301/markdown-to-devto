@@ -205,9 +205,10 @@ def get_article_data(path):
 
     """
     article = frontmatter.load(path)
-    article["content"] = frontmatter.dumps(article)
-    checksum = hashlib.md5(article["content"].encode("utf-8")).hexdigest()
+    article_content = frontmatter.dumps(article)
+    checksum = hashlib.md5(article_content.encode("utf-8")).hexdigest()
     article["checksum"] = checksum
+    article["content"] = frontmatter.dumps(article)
     return article
 
 
@@ -228,8 +229,6 @@ def upload_article(article, devto_article, http_client):
         http_client (HTTPClient): Used to make HTTP requests to dev.to API and also Imgur.
 
     """
-    if http_client.imgur_client_id:
-        article["content"] = upload_local_images(article, http_client)
 
     if devto_article:
         logger.info("Article already exists on dev.to.")
@@ -238,12 +237,18 @@ def upload_article(article, devto_article, http_client):
         )
 
         if not checksum_matched:
+            if http_client.imgur_client_id:
+                article["content"] = upload_local_images(article, http_client)
+
             logger.info("Checksum does not match, article needs to be updated on dev.to.")
             article_id = devto_article["id"]
             logger.info("Updating article on dev.to.")
             http_client.update_article(article_id, article)
 
     else:
+        if http_client.imgur_client_id:
+            article["content"] = upload_local_images(article, http_client)
+
         logger.info("Creating article on dev.to.")
         http_client.create_article(article)
 
@@ -295,19 +300,19 @@ def upload_local_images(article_data, http_client):
 
     for image_markdown in images_in_article:
         description, local_path = image_markdown
-        logger.info(f"Uploading image at {local_path}.")
+        logger.debug(f"Uploading image at {local_path}.")
         image_path = os.path.join(article_path, local_path)
         link = http_client.upload_image(image_path)
         old_image_markdown = f"![{description}]({local_path})"
         new_image_markdown = f"![{description}]({link})"
-        logger.info(f"Updating path of image in article from {local_path} to {link}.")
+        logger.debug(f"Updating path of image in article from {local_path} to {link}.")
         content = content.replace(old_image_markdown, new_image_markdown)
 
     cover_path = os.path.join(article_path, cover_image)
     if os.path.isfile(cover_path):
-        logger.info("Updating article cover image.")
+        logger.debug("Updating article cover image.")
         link = http_client.upload_image(cover_path)
-        logger.info(f"Updating path of cover image in article from {cover_image} to {link}.")
+        logger.debug(f"Updating path of cover image in article from {cover_image} to {link}.")
         content = content.replace(f"cover_image: {cover_image}", f"cover_image: {link}")
 
     return content

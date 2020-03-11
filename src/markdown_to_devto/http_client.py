@@ -39,7 +39,7 @@ class HTTPClient:
         url = "https://dev.to/api/articles/me/all"
         while True:
             current_articles = self._make_http_request(
-                method="get", url=url, query={"page": page, "per_page": 200}, headers={"api-key": self.devto_api_key},
+                method="get", url=url, params={"page": page, "per_page": 200}, headers={"api-key": self.devto_api_key},
             )
             if not current_articles:
                 break
