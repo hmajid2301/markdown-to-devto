@@ -43,11 +43,7 @@ logger = logging.getLogger(__name__)
 @click.option("--file", "-m", type=click.Path(exists=True), help="The markdown file to publish.")
 @click.option("--folder", "-f", type=click.Path(exists=True), help="Path to folder to publish markdown files from.")
 @click.option(
-    "--ignore",
-    "-i",
-    type=click.Path(exists=True),
-    multiple=True,
-    help="Path to folder to ignore and not publish markdown files from .history.",
+    "--ignore", "-i", multiple=True, help="Folder to ignore and not publish markdown files from i.e. .history.",
 )
 @click.option(
     "--log-level", "-l", default="INFO", type=click.Choice(["DEBUG", "INFO", "ERROR"]), help="Log level for the script."
@@ -75,10 +71,10 @@ def cli(devto_api_key, imgur_id, file, folder, ignore, log_level):
             articles_uploaded += 1
         except exceptions.HTTPException as error:
             logger.error(f"Failed to upload, {error.msg}.")
-        except FileNotFoundError:
-            logger.error("Failed to upload file, file doesn't exist.")
-        except OSError:
-            logger.error("Failed to upload file, file cannot open.")
+        except FileNotFoundError as error:
+            logger.error(f"Failed to upload file, file doesn't exist, {error}.")
+        except OSError as error:
+            logger.error(f"Failed to upload file, cannot open file, {error}.")
 
         articled_uploaded, start = check_if_we_need_to_rate_limit(articles_uploaded, start)
 
@@ -117,14 +113,14 @@ def check_if_we_need_to_rate_limit(articles_uploaded, start):
     return articles_uploaded, start
 
 
-def get_article_paths(file, folder, ignore_paths):
+def get_article_paths(file, folder, ignore_folders):
     """Gets all the paths to the local markdown article. Either file or folder must be set. If the file is in the
     ignore path it will not be uploaded.
 
     Args:
         file (str): Path to file.
         folder (str): Path to folder.
-        ignore_paths (tuple): A list of paths to ignore markdown files in.
+        ignore_folders (tuple): A list of folders to ignore markdown files in.
 
     Returns:
         dict: key is the title of the article and value is details.
@@ -136,7 +132,7 @@ def get_article_paths(file, folder, ignore_paths):
         sys.exit(1)
     elif folder:
         for path in Path(folder).rglob("*.md"):
-            ignore = should_file_be_ignored(ignore_paths, path)
+            ignore = should_file_be_ignored(ignore_folders, path)
 
             if not ignore:
                 article_paths.append(path)
@@ -145,12 +141,13 @@ def get_article_paths(file, folder, ignore_paths):
     return article_paths
 
 
-def should_file_be_ignored(ignore_paths, path):
+def should_file_be_ignored(ignore_folders, path):
     """Checks if file should be ignored or not, based on what list of files/folders
-    the user has passed as input.
+    the user has passed as input. If the ignore folder name is in the
+    path of the article (markdown file) we will ignore it.
 
     Args:
-        ignore_paths (tuple): A list of paths to ignore markdown files in.
+        ignore_folders (tuple): A list of folders to ignore markdown files in.
         path (str): Path to markdown file.
 
     Returns:
@@ -158,9 +155,9 @@ def should_file_be_ignored(ignore_paths, path):
 
     """
     ignore = False
-    for path_to_ignore in ignore_paths:
-        normalised_ignore_path = os.path.normpath(path_to_ignore)
-        if os.path.commonpath([path_to_ignore, path]) == normalised_ignore_path:
+    for path_to_ignore in ignore_folders:
+        article_path = os.path.dirname(path)
+        if path_to_ignore in article_path:
             ignore = True
             break
 
@@ -292,29 +289,65 @@ def upload_local_images(article_data, http_client):
         bool: True if the checksum matched else false.
 
     """
-
-    content, cover_image, article_path = article_data["content"], article_data["cover_image"], article_data["path"]
     logger.info("Uploading images to Imgur.")
+    content = upload_image_tags(article_data, http_client)
+    content = upload_cover_image(article_data, http_client)
+    return content
+
+
+def upload_image_tags(article_data, http_client):
+    """Finds all the image tags (with local paths) in the markdown file and uploads them to Imgur. It then replaces
+    them with new paths on imgur.
+
+    Args:
+        article_data (frontmatter): Article data.
+        http_client (HTTPClient): Used to make HTTP requests to Imgur.
+
+    Returns:
+        bool: True if the checksum matched else false.
+
+    """
+    content, article_path = article_data["content"], article_data["path"]
     images_in_markdown = re.compile(r"(?:!\[(.*?)\]\((.*?)\))")
     images_in_article = re.findall(images_in_markdown, content)
 
     for image_markdown in images_in_article:
         description, local_path = image_markdown
-        logger.debug(f"Uploading image at {local_path}.")
         image_path = os.path.join(article_path, local_path)
+        logger.debug(f"Uploading image at {image_path}.")
+        if not os.path.isfile(image_path):
+            continue
+
         link = http_client.upload_image(image_path)
         old_image_markdown = f"![{description}]({local_path})"
         new_image_markdown = f"![{description}]({link})"
-        logger.debug(f"Updating path of image in article from {local_path} to {link}.")
+        logger.debug(f"Updating path of image in article from {image_path} to {link}.")
         content = content.replace(old_image_markdown, new_image_markdown)
 
+    return content
+
+
+def upload_cover_image(article_data, http_client):
+    """Uploads the cover image if it's a local file in the frontmatter to Imgur. It then replaces the local path
+    with new uploaded path.
+
+    Args:
+        article_data (frontmatter): Article data.
+        http_client (HTTPClient): Used to make HTTP requests to Imgur.
+
+    Returns:
+        bool: True if the checksum matched else false.
+
+    """
+    content, cover_image, article_path = article_data["content"], article_data["cover_image"], article_data["path"]
     cover_path = os.path.join(article_path, cover_image)
+
     if os.path.isfile(cover_path):
         logger.debug("Updating article cover image.")
+        logger.debug(f"Uploading image at {cover_path}.")
         link = http_client.upload_image(cover_path)
-        logger.debug(f"Updating path of cover image in article from {cover_image} to {link}.")
+        logger.debug(f"Updating path of cover image in article from {cover_path} to {link}.")
         content = content.replace(f"cover_image: {cover_image}", f"cover_image: {link}")
-
     return content
 
 

@@ -51,7 +51,7 @@ Options:
 
 .. code-block:: bash
 
-    $ markdown_to_devto --devto-api-key ATokenAPI --imgur-id ImgurClientId --folder tests/data --ignore /tests/data/another_folder
+    $ markdown_to_devto --devto-api-key ATokenAPI --imgur-id ImgurClientId --folder tests/data --ignore another_folder --ignore .history --ignore node_modules
 
 Example Articles
 ****************

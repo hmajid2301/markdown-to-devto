@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0-beta.3] - 2020-03-13
+### Changed
+- Ignore folder logic, it checks if the ignore folder is in the path of the article.
+- Upload logic into two separate functions.
+- Updated the timeout time to 30 seconds.
+
 ## [0.1.0-beta.2] - 2020-03-11
 ### Added
 - Log level to args.
@@ -24,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Publish images to Imgur and replace local references with new Imgur ones.
 - Create/Update articles on dev.to.
 
-[Unreleased]: https://gitlab.com/hmajid2301/markdown-to-devto/-/compare/release%2F0.1.0-beta.1...master
-[0.1.0-beta.2]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.1.0-beta.1
+[Unreleased]: https://gitlab.com/hmajid2301/markdown-to-devto/-/compare/release%2F0.1.0-beta.3...master
+[0.1.0-beta.3]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.1.0-beta.3
+[0.1.0-beta.2]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.1.0-beta.2
 [0.1.0-beta.1]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.1.0-beta.1

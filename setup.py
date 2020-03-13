@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="markdown-to-devto",
-    version="0.1.0-beta.2",
+    version="0.1.0-beta.3",
     description="A CLI tool for publish markdown articles to dev.to",
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",

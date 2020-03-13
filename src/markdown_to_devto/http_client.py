@@ -113,7 +113,7 @@ class HTTPClient:
         """
         http_method = getattr(requests, method)
         try:
-            response = http_method(url, timeout=5, **kwargs)
+            response = http_method(url, timeout=30, **kwargs)
         except (requests.ConnectTimeout, requests.ConnectionError) as e:
             raise exceptions.HTTPConnectionException(msg=e)
 
