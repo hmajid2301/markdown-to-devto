@@ -39,7 +39,7 @@ class HTTPClient:
         url = "https://dev.to/api/articles/me/all"
         while True:
             current_articles = self._make_http_request(
-                method="get", url=url, params={"page": page, "per_page": 200}, headers={"api-key": self.devto_api_key},
+                method="get", url=url, params={"page": page, "per_page": 200}, headers={"api-key": self.devto_api_key}
             )
             if not current_articles:
                 break
@@ -62,7 +62,8 @@ class HTTPClient:
         data = {"article": {"body_markdown": article_data["content"]}}
         url = f"https://dev.to/api/articles/{article_id}"
         headers = {"api-key": self.devto_api_key}
-        self._make_http_request(method="put", url=url, json=data, headers=headers)
+        response = self._make_http_request(method="put", url=url, json=data, headers=headers)
+        return response
 
     def create_article(self, article_data):
         """Create a new article on dev.to.
@@ -74,7 +75,8 @@ class HTTPClient:
         data = {"article": {"body_markdown": article_data["content"]}}
         url = f"https://dev.to/api/articles"
         headers = {"api-key": self.devto_api_key}
-        self._make_http_request(method="post", url=url, json=data, headers=headers)
+        response = self._make_http_request(method="post", url=url, json=data, headers=headers)
+        return response
 
     def upload_image(self, local_path):
         """Uploads an image to Imgur (as an anonymouse image).

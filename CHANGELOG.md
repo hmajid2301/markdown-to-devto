@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Log the URL of the article that was changed/updated, fixes #1.
+
+### Changed
+- The upload and update HTTP methods now return the response JSON data.
 
 ## [0.1.0-beta.3] - 2020-03-13
 ### Changed

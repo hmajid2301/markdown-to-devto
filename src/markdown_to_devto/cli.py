@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 @click.option("--file", "-m", type=click.Path(exists=True), help="The markdown file to publish.")
 @click.option("--folder", "-f", type=click.Path(exists=True), help="Path to folder to publish markdown files from.")
 @click.option(
-    "--ignore", "-i", multiple=True, help="Folder to ignore and not publish markdown files from i.e. .history.",
+    "--ignore", "-i", multiple=True, help="Folder to ignore and not publish markdown files from i.e. .history."
 )
 @click.option(
     "--log-level", "-l", default="INFO", type=click.Choice(["DEBUG", "INFO", "ERROR"]), help="Log level for the script."
@@ -239,15 +239,15 @@ def upload_article(article, devto_article, http_client):
 
             logger.info("Checksum does not match, article needs to be updated on dev.to.")
             article_id = devto_article["id"]
-            logger.info("Updating article on dev.to.")
-            http_client.update_article(article_id, article)
+            response = http_client.update_article(article_id, article)
+            logger.info(f"Updating article on dev.to, at {response['url']}")
 
     else:
         if http_client.imgur_client_id:
             article["content"] = upload_local_images(article, http_client)
 
-        logger.info("Creating article on dev.to.")
-        http_client.create_article(article)
+        response = http_client.create_article(article)
+        logger.info(f"Creating article on dev.to, at {response['url']}")
 
 
 def check_if_article_requires_update(devto_content, local_checksum):
