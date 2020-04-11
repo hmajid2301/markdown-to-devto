@@ -1,3 +1,5 @@
+__VERSION__ = "0.2.0-beta.1"
+
 # -*- coding: utf-8 -*-
 r"""A CLI tool for publishing your markdown articles to dev.to. The tool can also auto upload local images to imgur and
 then update the reference to point to these uploaded images.
@@ -205,8 +207,47 @@ def get_article_data(path):
     article_content = frontmatter.dumps(article)
     checksum = hashlib.md5(article_content.encode("utf-8")).hexdigest()
     article["checksum"] = checksum
-    article["content"] = frontmatter.dumps(article)
+    new_article = remove_new_lines_in_paragraph(frontmatter.dumps(article))
+    article["content"] = new_article
     return article
+
+
+def remove_new_lines_in_paragraph(article):
+    """When we publish articles to dev.to sometimes the paragraphs don't look very good.
+    So we will remove all new lines from paragraphs before we publish them. This means we
+    don't have to have very long lines in the document making it easier to edit.
+
+    Some elements we don't want to remove the newlines from, like code blocks or frontmatter.
+    So the logic is simple remove new lines from elements except specific ones like code blocks.
+    Of course code blocks can span multiple lines so when we see a code block ``` we skip lines
+    end until we see end of that code block ```. The same logic applies to all the elements
+    we want to ski
+
+    Args:
+        article (str): The article we want to publish.
+
+    Returns:
+        str: The article with new lines removed from article.
+
+    """
+    skip_chars = ["```", "---"]
+    endswith_char = ""
+
+    article_lines = article.split("\n\n")
+    for index, line in enumerate(article_lines):
+        line_startswith_skip_char = [char for char in skip_chars if line.startswith(char)]
+
+        if line_startswith_skip_char or endswith_char:
+            if line_startswith_skip_char:
+                endswith_char = line_startswith_skip_char[0]
+
+            if line.endswith(endswith_char):
+                endswith_char = ""
+            continue
+
+        article_lines[index] = line.replace("\n", " ")
+
+    return "\n\n".join(article_lines)
 
 
 def upload_article(article, devto_article, http_client):
