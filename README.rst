@@ -23,9 +23,9 @@ on dev.to. It matches articles based on title in the frontmatter.
 Usage
 -----
 
-To use the CLI you will need a `dev.to API Key <https://docs.dev.to/api/#section/Authentication/api_key>_`.
+To use the CLI you will need a `dev.to API Key <https://docs.dev.to/api/#section/Authentication/api_key>`_.
 If you want to auto upload your local images to Imgur you need to use the ``-a`` or ``-imgur-id`` and 
-enter your `client id  <https://api.imgur.com/oauth2/addclient>_`.
+enter your `client id  <https://api.imgur.com/oauth2/addclient>`_.
 
 .. code-block:: bash
 
