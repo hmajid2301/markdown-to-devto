@@ -1,4 +1,4 @@
-__VERSION__ = "0.2.0-beta.2"
+__VERSION__ = "0.2.1-beta.1"
 
 # -*- coding: utf-8 -*-
 r"""A CLI tool for publishing your markdown articles to dev.to. The tool can also auto upload local images to imgur and
@@ -230,7 +230,7 @@ def remove_new_lines_in_paragraph(article):
         str: The article with new lines removed from article.
 
     """
-    skip_chars = ["```", "---"]
+    skip_chars = ["```", "---", "-", "*", "!["]
     endswith_char = ""
 
     article_lines = article.split("\n\n")
