@@ -4,7 +4,7 @@ class HTTPException(Exception):
 
 class HTTPAuthException(HTTPException):
     def __init__(self, msg):
-        self.msg = f"Unable to authenticate request, check `DEVTO_API_KEY`."
+        self.msg = "Unable to authenticate request, check `DEVTO_API_KEY`."
         super().__init__(msg)
 
 

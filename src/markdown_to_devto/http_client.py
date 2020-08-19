@@ -73,7 +73,7 @@ class HTTPClient:
 
         """
         data = {"article": {"body_markdown": article_data["content"]}}
-        url = f"https://dev.to/api/articles"
+        url = "https://dev.to/api/articles"
         headers = {"api-key": self.devto_api_key}
         response = self._make_http_request(method="post", url=url, json=data, headers=headers)
         return response

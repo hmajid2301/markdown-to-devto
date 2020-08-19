@@ -1,4 +1,4 @@
-__VERSION__ = "0.2.1-beta.1"
+__VERSION__ = "0.2.2-beta.1"
 
 # -*- coding: utf-8 -*-
 r"""A CLI tool for publishing your markdown articles to dev.to. The tool can also auto upload local images to imgur and
@@ -207,9 +207,29 @@ def get_article_data(path):
     article_content = frontmatter.dumps(article)
     checksum = hashlib.md5(article_content.encode("utf-8")).hexdigest()
     article["checksum"] = checksum
+    article["tags"] = convert_tags(article["tags"])
     new_article = remove_new_lines_in_paragraph(frontmatter.dumps(article))
     article["content"] = new_article
     return article
+
+
+def convert_tags(tags):
+    """Will convert tags so the article can be uploaded to dev.to. This involves removing the `-` and making the tag
+    lowercase.
+
+    Args:
+        tags (list): The list of tags to convert.
+
+    Returns:
+        list: The list of converted tags
+
+    """
+    new_tags = []
+    for tag in tags:
+        converted_tag = tag.replace("-", "").lower()
+        new_tags.append(converted_tag)
+
+    return new_tags
 
 
 def remove_new_lines_in_paragraph(article):

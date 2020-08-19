@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2-beta.1] - 2020-08-19
+### Changed
+- Tags are converted from "react-native" to "reactnative" so it's compatible with `dev.to`.
+
 ## [0.2.1-beta.1] - 2020-05-05
 ### Fixed
 - Don't remove lines from lists.
@@ -45,7 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Publish images to Imgur and replace local references with new Imgur ones.
 - Create/Update articles on dev.to.
 
-[Unreleased]: https://gitlab.com/hmajid2301/markdown-to-devto/-/compare/release%2F0.2.1-beta.1...master
+[Unreleased]: https://gitlab.com/hmajid2301/markdown-to-devto/-/compare/release%2F0.2.2-beta.1...master
+[0.2.2-beta.1]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.2.2-beta.1...release%2F0.2.1-beta.1
 [0.2.1-beta.1]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.2.1-beta.1...release%2F0.2.0-beta.2
 [0.2.0-beta.2]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.2.0-beta.2...release%2F0.2.0-beta.1
 [0.2.0-beta.1]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.2.0-beta.1...release%2F0.1.0-beta.3
