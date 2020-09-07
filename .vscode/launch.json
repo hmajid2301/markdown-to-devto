@@ -1,0 +1,36 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Test CLI",
+      "type": "python",
+      "request": "launch",
+      "module": "markdown_to_devto.cli",
+      "args": [
+        "-k",
+        "FGsW7diL5VMSrZDU",
+        "-a",
+        "2ea79131b",
+        "-m",
+        "tests/data/another_folder/another.md"
+      ]
+    },
+    {
+      "name": "Tests",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["tests", "-rf"]
+    }
+  ]
+}

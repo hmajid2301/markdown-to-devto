@@ -31,6 +31,7 @@ from pathlib import Path
 
 import click
 import frontmatter
+import regex
 
 from .http_client import HTTPClient
 from .utils import exceptions
@@ -48,19 +49,30 @@ logger = logging.getLogger(__name__)
     "--ignore", "-i", multiple=True, help="Folder to ignore and not publish markdown files from i.e. .history."
 )
 @click.option(
+    "--output",
+    "-o",
+    type=click.Path(exists=True),
+    help="Where to save the articles after they have been transformed (the articles will still be uploaded).",
+)
+@click.option(
+    "--site",
+    "-s",
+    help="If you're are using the Gatsby plugin to allow local links between articles. For dev.to we will need to replace with the link to your blog.",
+)
+@click.option(
     "--log-level", "-l", default="INFO", type=click.Choice(["DEBUG", "INFO", "ERROR"]), help="Log level for the script."
 )
-def cli(devto_api_key, imgur_id, file, folder, ignore, log_level):
+def cli(devto_api_key, imgur_id, file, folder, ignore, output, site, log_level):
     """A CLI tool for publish markdown articles to dev.to."""
     logger.setLevel(log_level)
     local_article_paths = get_article_paths(file, folder, ignore)
-    articles_to_upload = get_local_articles(local_article_paths)
+    articles_to_upload = get_local_articles(local_article_paths, site)
     http_client = HTTPClient(devto_api_key=devto_api_key, imgur_client_id=imgur_id)
 
     try:
         devto_articles = http_client.get_articles()
     except exceptions.HTTPException as error:
-        logger.error(f"Failed to get articles on dev.to, {error.msg}.")
+        logger.error(f"Failed to get articles on dev.to, {error}.")
         sys.exit(1)
 
     start = time.time()
@@ -70,9 +82,11 @@ def cli(devto_api_key, imgur_id, file, folder, ignore, log_level):
         logger.info(f"Uploading Article with title {article_title}.")
         try:
             upload_article(article_data, devto_article, http_client)
+            if output:
+                save_article(output, article_data)
             articles_uploaded += 1
         except exceptions.HTTPException as error:
-            logger.error(f"Failed to upload, {error.msg}.")
+            logger.error(f"Failed to upload, {error}.")
         except FileNotFoundError as error:
             logger.error(f"Failed to upload file, file doesn't exist, {error}.")
         except OSError as error:
@@ -158,19 +172,20 @@ def should_file_be_ignored(ignore_folders, path):
     """
     ignore = False
     for path_to_ignore in ignore_folders:
-        article_path = os.path.dirname(path)
-        if path_to_ignore in article_path:
+        article_dirname = f"{os.path.dirname(path)}/"
+        if path_to_ignore in article_dirname:
             ignore = True
             break
 
     return ignore
 
 
-def get_local_articles(article_paths):
+def get_local_articles(article_paths, site):
     """Gets all the local markdown files that we will attempt to upload to dev.to.
 
     Args:
         article_paths (list): List of paths for local articles to upload to dev.to.
+        site (str): The site to use to replace local links with.
 
     Returns:
         dict: key is the title of the article and value is details.
@@ -179,7 +194,7 @@ def get_local_articles(article_paths):
     logger.info("Getting local articles.")
     articles_data = {}
     for article_path in article_paths:
-        article = get_article_data(article_path)
+        article = get_article_data(article_path, site)
         title = article["title"]
         articles_data[title] = article
         articles_data[title]["path"] = os.path.dirname(article_path)
@@ -187,7 +202,7 @@ def get_local_articles(article_paths):
     return articles_data
 
 
-def get_article_data(path):
+def get_article_data(path, site):
     """Gets the article data, which includes all the fields in the frontmatter as keys/values in a dict.
     We then generate a checksum with the contents of the article (excluding the fronmatter).
 
@@ -197,19 +212,31 @@ def get_article_data(path):
     The checksum is generated now because later on we may make changes to the images using `imgur` links.
 
     Args:
-        path (list): Path of the article file to upload.
+        path (str): Path of the article file to upload.
+        site (str): The site to use to replace local links with.
 
     Returns:
         frontmatter.post: key are items in the frontmatter and the contents of the article.
 
     """
     article = frontmatter.load(path)
+    article["path"] = str(path)
+    article = clean_article_data(article, site, path)
     article_content = frontmatter.dumps(article)
     checksum = hashlib.md5(article_content.encode("utf-8")).hexdigest()
     article["checksum"] = checksum
+    return article
+
+
+def clean_article_data(article, site, path):
+    content = article.content
+    content = remove_new_lines_in_paragraph(content)
+    content = replace_local_links(content, site)
+    content = replace_youtube_links(content)
+    content = replace_code_meta(content, path)
+
     article["tags"] = convert_tags(article["tags"])
-    new_article = remove_new_lines_in_paragraph(frontmatter.dumps(article))
-    article["content"] = new_article
+    article["content"] = content
     return article
 
 
@@ -268,6 +295,119 @@ def remove_new_lines_in_paragraph(article):
         article_lines[index] = line.replace("\n", " ")
 
     return "\n\n".join(article_lines)
+
+
+def replace_local_links(content, site):
+    """Replaces a local link with the same link on an external blog. Originally crated because of `gatsby-plugin-catch-links`. Where
+    a link like ``[Blog Link](/blog/article-1)`` would get transformed into ``[Blog Link](https://haseebmajid.dev/blog/article-1)``.
+    So in case any markdown files link locally we will transform them when on dev.to to link to our blog
+
+    Args:
+        content (str): Article data.
+        site (str): The site URL i.e. https://haseebmajid.dev, that will be prepended onto local links
+
+    Returns:
+        str: The content replacing local links with the external one.
+
+    """
+    links_in_markdown = re.compile(r"^\[([\w\s\d]+)\]\(((?:\/|https?:\/\/)[\w\d./?=#]+)\)$")
+    links_in_article = re.findall(links_in_markdown, content)
+
+    for link in links_in_article:
+        local_link_start = "](/"
+        if local_link_start in link:
+            local_link_index = link.find("(\\")
+            new_website_link = f"{link[:local_link_index + 1]}{site}/{link[local_link_index + 1:]}"
+            logger.debug(f"Updating local link {link}, {new_website_link}.")
+            content = content.replace(link, new_website_link)
+
+    return content
+
+
+def replace_youtube_links(content):
+    """Replaces a youtube link with the liquid links required for dev.to. Originally crated because of my Gatsby blog.
+    For example this would become.
+
+    ::
+
+        `youtube: abcdef`
+
+
+    To this:
+
+    ::
+
+        {% youtube abcdef %}
+
+    Args:
+        content (str): Article data.
+
+    Returns:
+        str: The content replacing youtube links with the external one.
+
+    """
+    youtube_links_in_markdown = re.compile(r"(?<=`youtube:).*`")
+    links_in_article = re.match(youtube_links_in_markdown, content)
+
+    if links_in_article is None:
+        links_in_article = []
+
+    for link in links_in_article:
+        old_link = f"`youtube: {link}"
+        new_link = f"{{% youtube {link.replace('`', '').replace(':', '')} %}}"
+        logger.debug(f"Updating youtube link {old_link} with {new_link}.")
+        content = content.replace(old_link, new_link)
+
+    return content
+
+
+def replace_code_meta(content, path):
+    """Replaces a code block meta data will the full code block data that dev.to will require. This is for
+    users who use `gatsby-remark-import-code` and `gatsby-remark-code-titles` in their markdown files.
+    This allows remark to import code from a specified file. However dev.to won't be able to do this for
+    us so if we have a code block like this:
+
+    ::
+
+        ```py:title=test.png file=./c.py
+        ```
+
+    This will be turned into this:
+
+    ::
+
+        ```py
+        import os
+        ```
+
+    Args:
+        content (str): Article data.
+        path (str): The path to the markdown file.
+
+    Returns:
+        str: The content replacing code block meta data with normal code block data.
+
+    """
+    code_block_in_markdown = re.compile(r"(```[a-z=.:\/ ]*\n[\s\S]*?\n```)")
+    code_blocks_in_article = re.findall(code_block_in_markdown, content)
+
+    for code_block in code_blocks_in_article:
+        start_code_block = regex.sub("(?<=```[a-z]*):title=.+ ", " ", code_block)
+        if start_code_block.startswith("```") and "file=" in start_code_block:
+            source_code_path = start_code_block.split("\n")[0].split(" ")[1].replace("file=", "")
+            absolute_source_code_path = os.path.join(os.path.dirname(path), source_code_path)
+            start_code_block = start_code_block.split(" ")[0]
+            logger.debug(f"Importing code block from, {absolute_source_code_path}.")
+
+            try:
+                with open(absolute_source_code_path) as code_file:
+                    code_contents = code_file.read()
+                    new_code_block = f"{start_code_block}\n{code_contents}\n```"
+                    content = content.replace(code_block, new_code_block)
+            except FileNotFoundError:
+                logger.warn(f"File not found at {absolute_source_code_path}")
+
+    return content
 
 
 def upload_article(article, devto_article, http_client):
@@ -410,6 +550,22 @@ def upload_cover_image(article_data, http_client):
         logger.debug(f"Updating path of cover image in article from {cover_path} to {link}.")
         content = content.replace(f"cover_image: {cover_image}", f"cover_image: {link}")
     return content
+
+
+def save_article(output, article):
+    try:
+        del article.metadata["content"]
+    except KeyError as e:
+        logger.error(f"Missing content in article metadata {e}")
+        raise KeyError
+
+    file_name = f"{article.metadata['title'].replace(' ', '-')}.md"
+    file_path = os.path.join(output, file_name)
+    with open(file_path, "w") as f:
+        try:
+            frontmatter.dump(article, f)
+        except PermissionError:
+            logger.warning(f"Failed to save file at {file_path}.")
 
 
 if __name__ == "__main__":

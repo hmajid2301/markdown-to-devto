@@ -8,7 +8,7 @@ setup(
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",
     author="Haseeb Majid",
-    author_email="me@haseebmajid.dev",
+    author_email="hello@haseebmajid.dev",
     keywords="cli, tool",
     license="Apache License",
     url="https://gitlab.com/hmajid2301/markdown-to-devto",
@@ -17,7 +17,7 @@ setup(
     packages=find_packages(where="src"),
     zip_safe=False,
     include_package_data=True,
-    install_requires=["click>=7.0", "requests>=2.23.0", "python-frontmatter>=0.5.0"],
+    install_requires=["click>=7.0", "requests>=2.23.0", "python-frontmatter>=0.5.0", "regex>=2020.11.13"],
     entry_points={"console_scripts": ["markdown_to_devto = markdown_to_devto.cli:cli"]},
     classifiers=[
         "Programming Language :: Python",

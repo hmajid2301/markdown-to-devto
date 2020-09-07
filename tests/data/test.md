@@ -1,7 +1,7 @@
 ---
 title: A Test Message
 published: false
-tags: ci,react-native,gitlab
+tags: [ci, react-native, gitlab]
 cover_image: https://cdn-images-1.medium.com/max/1024/0*zoKBYDQXHpqWod1E.png
 ---
 

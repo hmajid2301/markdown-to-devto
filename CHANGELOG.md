@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Unit tests for python 3.6, 3.7 and 3.8.
+- Ability to save file after uploading it.
+
+### Changed
+- Various small bugs, such as files not being ignored correctly.
 
 ## [0.2.2-beta.1] - 2020-08-19
 ### Changed
