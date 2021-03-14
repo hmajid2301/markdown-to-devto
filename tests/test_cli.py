@@ -48,6 +48,24 @@ def test_fail_args(runner, args, exit_code):
             [
                 [
                     {
+                        "id": "123797",
+                        "body_markdown": "---\nchecksum: 7eb95ce783e8896686c88c739cd30ac3\ncover_image: https://cdn-images-1.medium.com/max/1024/0*zoKBYDQXHpqWod1E.png\npublished: false\ntags: ci,react-native,gitlab\ntitle: A Test Message\n---\n\n> Before we dive straight into the CI file itself, let’s do a quicker refresher on some basic concepts. with CI/CD, Git and Gitlab CI.\n\nContinuous Integration (CI), is typically defined as making sure all code being integrated into a codebase works. It usually involves running a set of jobs referred to as a CI pipeline. Some jobs we may run include lintinusuasia tool such as Travis, Circle or even Gitlab.\n\n![a](images/a.png)\n![b](images/b.jpg)",
+                        "title": "A Test Message",
+                    },
+                    {
+                        "id": "78979",
+                        "body_markdown": "---\nchecksum: dabaaec68730e589699a6006b4a73ce2\ncover_image: https://dev-to-uploads.s3.amazonaws.com/i/w00r4rpmfpjqb8wgygxu.jpg\nlicense: public-domain\ntags:\n- React Native\n- CI\n- GitLab\n- Automation\n- Android\ntitle: Auto Publish React Native App to Android Play Store using GitLab CI\n---\n\nIn this article, I will show you how can automate the publishing of your AAB/APK to the `Google Play Console`.\nWe will be using the [Gradle Play Publisher](https://github.com/Triple-T/gradle-play-publisher) (GPP) plugin to do\nautomate this process for us. Using this plugin we cannot only automate the publishing and release of our app,\nwe can also update the release notes, store listing (including photos) all from GitLab CI. \n\n**Note:** In this article I will assume that you are using Linux and React Native version >= 0.60.\n\n![c](c.jpg)\n![c](c.jpg)\n![c](c.jpg)\n\n---------------------------------------------------------------------------------------------------",
+                        "title": "Auto Publish React Native App to Android Play Store using GitLab CI",
+                    },
+                ],
+                [],
+            ],
+            ["-k", "AKEY", "-m", "tests/data/another.md", "-o", "tests/data/tmp/"],
+        ),
+        (
+            [
+                [
+                    {
                         "id": "78979",
                         "body_markdown": "---\nchecksum: dabaaec68730e589699a6006b4a73ce2\ncover_image: https://dev-to-uploads.s3.amazonaws.com/i/w00r4rpmfpjqb8wgygxu.jpg\nlicense: public-domain\ntags:\n- React Native\n- CI\n- GitLab\n- Automation\n- Android\ntitle: Auto Publish React Native App to Android Play Store using GitLab CI\n---\n\nIn this article, I will show you how can automate the publishing of your AAB/APK to the `Google Play Console`.\nWe will be using the [Gradle Play Publisher](https://github.com/Triple-T/gradle-play-publisher) (GPP) plugin to do\nautomate this process for us. Using this plugin we cannot only automate the publishing and release of our app,\nwe can also update the release notes, store listing (including photos) all from GitLab CI. \n\n**Note:** In this article I will assume that you are using Linux and React Native version >= 0.60.\n\n![c](c.jpg)\n![c](c.jpg)\n![c](c.jpg)\n\n---------------------------------------------------------------------------------------------------",
                         "title": "Auto Publish React Native App to Android Play Store using GitLab CI",
