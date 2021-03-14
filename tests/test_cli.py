@@ -102,6 +102,9 @@ def test_success(mocker, runner, devto_articles, args):
     result = runner.invoke(cli, args)
     assert result.exit_code == 0
 
+    if "-o" in args:
+        pass
+
 
 def test_dev_to_api_auth_failure_get_articles(mocker, runner):
     args = ["-k", "AKEY", "-f", "tests/data/", "-i", "tests/data/another_folder/"]
