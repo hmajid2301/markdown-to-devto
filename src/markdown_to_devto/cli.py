@@ -554,7 +554,10 @@ def upload_cover_image(article_data, http_client):
 
 def save_article(output, article):
     try:
+<<<<<<< HEAD
         article.content = article.metadata["content"]
+=======
+>>>>>>> master
         del article.metadata["content"]
     except KeyError as e:
         logger.error(f"Missing content in article metadata {e}")
@@ -562,7 +565,11 @@ def save_article(output, article):
 
     file_name = f"{article.metadata['title'].replace(' ', '-')}.md"
     file_path = os.path.join(output, file_name)
+<<<<<<< HEAD
     with open(file_path, "wb") as f:
+=======
+    with open(file_path, "w") as f:
+>>>>>>> master
         try:
             frontmatter.dump(article, f)
         except PermissionError:
