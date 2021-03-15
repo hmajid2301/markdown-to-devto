@@ -1,15 +1,15 @@
 ---
-checksum: 49e5991d15c849db284260b7022693ac
+checksum: 2dedceb7adbbafe300e9d255acefb0a0
 cover_image: https://dev-to-uploads.s3.amazonaws.com/i/w00r4rpmfpjqb8wgygxu.jpg
 license: public-domain
 path: tests/data
 publish: false
 tags:
-  - react native
-  - ci
-  - gitlab
-  - automation
-  - android
+- react native
+- ci
+- gitlab
+- automation
+- android
 title: Auto Publish React Native App to Android Play Store using GitLab CI
 ---
 

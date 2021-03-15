@@ -278,7 +278,7 @@ def remove_new_lines_in_paragraph(article):
         str: The article with new lines removed from article.
 
     """
-    skip_chars = ["```", "---", "-", "*", "!["]
+    skip_chars = ["```", "---", "-", "*", "![", ":::"]
     endswith_char = ""
 
     article_lines = article.split("\n\n")
@@ -437,7 +437,7 @@ def replace_admonitions(content):
         str: The content replacing admonitions with `>` quote.
 
     """
-    admonintions_in_markdown = re.compile(r"(:::[\s\S]*?\n:::)")
+    admonintions_in_markdown = re.compile(r":::[\s\S]*?\n:::")
     admonitions_in_article = re.findall(admonintions_in_markdown, content)
 
     for admonition in admonitions_in_article:
