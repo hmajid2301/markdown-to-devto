@@ -17,4 +17,10 @@ we can also update the release notes, store listing (including photos) all from 
 ![c](c.jpg)
 ![c](c.jpg)
 
+[My Blog](/blog/storybooks-with-mdx/)
+
+```py:title=test.png file=./c.py
+
+```
+
 ---------------------------------------------------------------------------------------------------
