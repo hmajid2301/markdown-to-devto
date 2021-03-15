@@ -75,6 +75,41 @@ the title ``Example Document``. The frontmatter includes all the various options
 
   ![c](c.jpg)
 
+Other
+=====
+
+You can have code block like this:
+
+.. code-block::
+
+  ```py:title=test.png file=./c.py
+
+  ```
+
+Will turn into this:
+
+.. code-block::
+
+  ```py
+  import os
+
+  ```
+
+
+And blocks like will be turned into
+
+.. code-block ::
+
+  :::caution Assumption
+  This next section assumes that you use Gitlab to host your repos.
+  It also assumes that for your Gatsby blog you use Gitlab CI to build/publish it.
+  :::
+
+.. code-block ::
+
+  > This next section assumes that you use Gitlab to host your repos. It also assumes that for your Gatsby blog you use Gitlab CI to build/publish it.
+
+
 GitLab CI
 *********
 

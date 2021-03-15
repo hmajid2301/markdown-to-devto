@@ -6,12 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.3.0] - 2021-03-15
 ### Added
 - Unit tests for python 3.6, 3.7 and 3.8.
 - Ability to save file after uploading it.
 
 ### Changed
 - Various small bugs, such as files not being ignored correctly.
+- Support turning admonitions into quote blocks using plugin: `gatsby-remark-admonitions`.
+- Support turning code blocks into proper code blocks `gatsby-remark-import-code` and `gatsby-remark-code-titles`.
 
 ## [0.2.2-beta.1] - 2020-08-19
 ### Changed
@@ -55,7 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Publish images to Imgur and replace local references with new Imgur ones.
 - Create/Update articles on dev.to.
 
-[Unreleased]: https://gitlab.com/hmajid2301/markdown-to-devto/-/compare/release%2F0.2.2-beta.1...master
+[Unreleased]: https://gitlab.com/hmajid2301/markdown-to-devto/-/compare/release%2F0.3.0...master
+[0.3.0]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.3.0...release%2F0.2.2-beta.1
 [0.2.2-beta.1]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.2.2-beta.1...release%2F0.2.1-beta.1
 [0.2.1-beta.1]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.2.1-beta.1...release%2F0.2.0-beta.2
 [0.2.0-beta.2]: https://gitlab.com/hmajid2301/markdown-to-devto/-/tags/release%2F0.2.0-beta.2...release%2F0.2.0-beta.1
