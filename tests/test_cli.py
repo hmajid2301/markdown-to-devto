@@ -1,3 +1,4 @@
+import filecmp
 import time
 
 import pytest
@@ -73,16 +74,24 @@ def test_fail_args(runner, args, exit_code):
     ],
 )
 def test_success(mocker, runner, devto_articles, args):
-    get_mock = mocker.Mock(status_code=200)
-    get_mock.json.side_effect = devto_articles
-    mocker.patch("requests.get", return_value=get_mock)
-
-    create_mock = mocker.Mock(status_code=201)
-    mocker.patch("requests.post", return_value=create_mock)
-    create_mock.json.return_value = {"data": {"link": "https://imgur.com/123456"}, "url": "random_url.com"}
-    mocker.patch("requests.put", return_value=create_mock)
-    result = runner.invoke(cli, args)
+    result = run_cli(mocker, runner, devto_articles, args)
     assert result.exit_code == 0
+
+
+@pytest.mark.parametrize(
+    "args, output, expected_file",
+    [
+        (
+            ["-k", "AKEY", "-m", "tests/data/another.md", "-o", "tests/data/tmp/"],
+            "tests/data/tmp/Auto-Publish-React-Native-App-to-Android-Play-Store-using-GitLab-CI.md",
+            "tests/data/expected/another.md",
+        ),
+    ],
+)
+def test_output_file(mocker, runner, args, output, expected_file):
+    result = run_cli(mocker, runner, [""], args)
+    assert result.exit_code == 0
+    assert filecmp.cmp(output, expected_file)
 
 
 def test_dev_to_api_auth_failure_get_articles(mocker, runner):
@@ -134,3 +143,15 @@ def test_dev_to_api_connection_failure_upload_articles(mocker, runner, exception
 def test_rate_limiting(time_wait):
     articled_uploaded, start = check_if_we_need_to_rate_limit(10, time.time() - time_wait)
     assert articled_uploaded == 0 and type(start) == float
+
+
+def run_cli(mocker, runner, devto_articles, args):
+    get_mock = mocker.Mock(status_code=200)
+    get_mock.json.side_effect = devto_articles
+    mocker.patch("requests.get", return_value=get_mock)
+    create_mock = mocker.Mock(status_code=201)
+    mocker.patch("requests.post", return_value=create_mock)
+    create_mock.json.return_value = {"data": {"link": "https://imgur.com/123456"}, "url": "random_url.com"}
+    mocker.patch("requests.put", return_value=create_mock)
+    result = runner.invoke(cli, args)
+    return result
