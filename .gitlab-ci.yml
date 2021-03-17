@@ -42,7 +42,6 @@ test:unit-tests:py36:
     - make tests PY=py36 || true
     - cat tests/data/tmp/Auto-Publish-React-Native-App-to-Android-Play-Store-using-GitLab-CI.md
     - cat tests/data/expected/another.md
-    - apk add diff
     - diff tests/data/tmp/Auto-Publish-React-Native-App-to-Android-Play-Store-using-GitLab-CI.md tests/data/expected/another.md > output.txt
     - cat output.txt
 
