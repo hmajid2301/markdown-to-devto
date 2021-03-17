@@ -40,10 +40,9 @@ test:unit-tests:py36:
   extends: ".test:unit-tests"
   script:
     - make tests PY=py36 || true
-    - cat tests/data/tmp/Auto-Publish-React-Native-App-to-Android-Play-Store-using-GitLab-CI.md
     - cat tests/data/expected/another.md
-    - diff tests/data/tmp/Auto-Publish-React-Native-App-to-Android-Play-Store-using-GitLab-CI.md tests/data/expected/another.md > output.txt
-    - cat output.txt
+    - cat tests/data/tmp/Auto-Publish-React-Native-App-to-Android-Play-Store-using-GitLab-CI.md
+    - diff tests/data/tmp/Auto-Publish-React-Native-App-to-Android-Play-Store-using-GitLab-CI.md tests/data/expected/another.md | tee output.txt
 
 test:unit-tests:py37:
   stage: test
