@@ -43,9 +43,16 @@ Options:
   -m, --file PATH                 The markdown file to publish.
   -f, --folder PATH               Path to folder to publish markdown files
                                   from.
-  -i, --ignore PATH               Path to folder to ignore and not publish
-                                  markdown files from .history.
-  -l, --log-level                 [DEBUG|INFO|ERROR]
+  -i, --ignore TEXT               Folder to ignore and not publish markdown
+                                  files from i.e. .history.
+  -o, --output PATH               Where to save the articles after they have
+                                  been transformed (the articles will still be
+                                  uploaded).
+  -s, --site TEXT                 If you're are using the Gatsby plugin to
+                                  allow local links between articles. For
+                                  dev.to we will need to replace with the link
+                                  to your blog.
+  -l, --log-level [DEBUG|INFO|ERROR]
                                   Log level for the script.
   --help                          Show this message and exit.
 
@@ -74,6 +81,41 @@ the title ``Example Document``. The frontmatter includes all the various options
   This is an example document.
 
   ![c](c.jpg)
+
+Other
+=====
+
+You can have code block like this:
+
+.. code-block::
+
+  ```py:title=test.png file=./c.py
+
+  ```
+
+Will turn into this:
+
+.. code-block::
+
+  ```py
+  import os
+
+  ```
+
+
+And blocks like will be turned into
+
+.. code-block ::
+
+  :::caution Assumption
+  This next section assumes that you use Gitlab to host your repos.
+  It also assumes that for your Gatsby blog you use Gitlab CI to build/publish it.
+  :::
+
+.. code-block ::
+
+  > This next section assumes that you use Gitlab to host your repos. It also assumes that for your Gatsby blog you use Gitlab CI to build/publish it.
+
 
 GitLab CI
 *********

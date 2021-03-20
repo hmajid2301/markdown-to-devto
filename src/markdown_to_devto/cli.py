@@ -234,6 +234,7 @@ def clean_article_data(article, site, path):
     content = replace_local_links(content, site)
     content = replace_youtube_links(content)
     content = replace_code_meta(content, path)
+    content = replace_admonitions(content)
 
     article["tags"] = convert_tags(article["tags"])
     article["content"] = content
@@ -277,7 +278,7 @@ def remove_new_lines_in_paragraph(article):
         str: The article with new lines removed from article.
 
     """
-    skip_chars = ["```", "---", "-", "*", "!["]
+    skip_chars = ["```", "---", "-", "*", "![", ":::"]
     endswith_char = ""
 
     article_lines = article.split("\n\n")
@@ -406,6 +407,44 @@ def replace_code_meta(content, path):
                     content = content.replace(code_block, new_code_block)
             except FileNotFoundError:
                 logger.warn(f"File not found at {absolute_source_code_path}")
+
+    return content
+
+
+def replace_admonitions(content):
+    """Replaces admonitions with quote blocks `>`. This allows those who use `gatsby-remark-admonitions` in their
+    markdown files, to publish to dev.to without any weird syntax.
+
+    This allows remark to import code from a specified file. However dev.to won't be parse admonitions like we can.
+
+    ::
+
+        :::caution Assumption
+        This next section assumes that you use Gitlab to host your repos.
+        It also assumes that for your Gatsby blog you use Gitlab CI to build/publish it.
+        :::
+
+    This will be turned into this:
+
+    ::
+
+        > This next section assumes that you use Gitlab to host your repos ...
+
+    Args:
+        content (str): Article data.
+
+    Returns:
+        str: The content replacing admonitions with `>` quote.
+
+    """
+    admonintions_in_markdown = re.compile(r":::[\s\S]*?\n:::")
+    admonitions_in_article = re.findall(admonintions_in_markdown, content)
+
+    for admonition in admonitions_in_article:
+        admonition_content = admonition.split("\n")[1:-1]
+        admonition_line = " ".join([line for line in admonition_content])
+        quote_line = f"> {admonition_line}"
+        content = content.replace(admonition, quote_line)
 
     return content
 
