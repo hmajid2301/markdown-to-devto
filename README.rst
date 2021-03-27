@@ -52,7 +52,7 @@ Options:
                                   allow local links between articles. For
                                   dev.to we will need to replace with the link
                                   to your blog.
-  -l, --log-level [DEBUG|INFO|ERROR]
+  -l, --log-level                 [DEBUG|INFO|ERROR]
                                   Log level for the script.
   --help                          Show this message and exit.
 
