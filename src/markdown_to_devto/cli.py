@@ -1,4 +1,4 @@
-__VERSION__ = "0.2.2-beta.1"
+__VERSION__ = "0.3.0"
 
 # -*- coding: utf-8 -*-
 r"""A CLI tool for publishing your markdown articles to dev.to. The tool can also auto upload local images to imgur and
